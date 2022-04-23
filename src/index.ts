@@ -1,3 +1,10 @@
+import { MST } from "./mst";
+
+const test = MST(4, 6);
+test.forEach((arr) => {
+  console.log(arr);
+});
+
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d", {
