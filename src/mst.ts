@@ -52,14 +52,17 @@ interface Node {
   neighbors: number[];
 }
 
-/** Creates a r x c grid-graph with random edge weights in the range [1, r x c].
- *  Represented with a 2D Node array with edge weights defined in neighbors. */
+/** Creates a r x c grid-graph with unique random edge weights in the range
+ *  [1, r x c]. Represented with a 2D Node array with edge weights defined in
+ *  neighbors. */
 function createRandomGridGraph(r: number, c: number): Node[][] {
   const graph: Array<Array<Node>> = Array.from(Array(c), (_) =>
     Array(r)
       .fill(0)
       .map(() => ({ neighbors: [0, 0, 0, 0] }))
   );
+
+  // r x c grid-graph has 2rc - r - c edges, define values for all
   const weights = Array(2 * r * c - r - c).fill(0);
   weights.forEach((_, i, arr) => {
     arr[i] = i + 1;
