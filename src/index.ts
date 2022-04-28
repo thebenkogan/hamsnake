@@ -31,8 +31,8 @@ select.onchange = () => {
 const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
-let cols = 30; // temp column count, will get expanded out
-let rows = 20; // row count
+let cols = 16; // temp column count, will get expanded out
+let rows = 8; // row count
 let hb = 5; // horizontal border width
 let vb = 10; // vertical border width
 const step = (height - 2 * vb) / rows; // grid step size
