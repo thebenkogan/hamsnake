@@ -38,13 +38,13 @@ export function MST(r: number, c: number): number[][] {
 }
 
 /** Converts number representation on grid-graph to (x,y) coordinate. */
-function numToCoord(c: number, n: number): number[] {
+export function numToCoord(c: number, n: number): number[] {
   return [n % c, Math.floor(n / c)];
 }
 
 /** Converts coordinate on grid-graph with c columns to number representation.
  *  Goes row by row and counts up (i.e. 2x3 = [[0, 1], [2, 3], [4, 5]]) */
-function coordToNum(c: number, [x, y]: number[]): number {
+export function coordToNum(c: number, [x, y]: number[]): number {
   return y * c + x;
 }
 
@@ -89,7 +89,7 @@ function createRandomGridGraph(r: number, c: number): Node[][] {
 }
 
 /** Returns the coordinate of the neighbor of the node at (x, y) in dir(ection). */
-function neighborPos(x: number, y: number, dir: number): number[] {
+export function neighborPos(x: number, y: number, dir: number): number[] {
   const dirx = dir == 1 ? 1 : dir == 3 ? -1 : 0;
   const diry = dir == 0 ? -1 : dir == 2 ? 1 : 0;
   return [x + dirx, y + diry];

@@ -1,9 +1,10 @@
-import { MST } from "./mst";
+import { createCycle } from "./hamcycle";
 
-const test = MST(4, 6);
-test.forEach((arr) => {
-  console.log(arr);
-});
+let cycle = createCycle(4, 4);
+for (let i = 0; i < 16; i++) {
+  console.log(cycle);
+  cycle = cycle.next;
+}
 
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
