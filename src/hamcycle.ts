@@ -3,7 +3,7 @@ import { MST, numToCoord, coordToNum, neighborPos } from "./mst";
 /** Node in Hamiltonian cycle at (x, y), with next position at next. The next
  *  node must be exactly 1 space from this node. The next of the last node
  *  is the first node in the cycle. */
-interface Cycle {
+export interface Cycle {
   x: number;
   y: number;
   next: Cycle;

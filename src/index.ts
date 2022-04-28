@@ -1,17 +1,11 @@
-import { createCycle } from "./hamcycle";
-
-let cycle = createCycle(4, 4);
-for (let i = 0; i < 16; i++) {
-  console.log(cycle);
-  cycle = cycle.next;
-}
+import { Cycle, createCycle } from "./hamcycle";
 
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d", {
   alpha: false,
 }) as CanvasRenderingContext2D;
-const select = document.getElementById("difficulty") as HTMLSelectElement;
+const select = document.getElementById("speed") as HTMLSelectElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
@@ -37,15 +31,19 @@ select.onchange = () => {
 const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions
-let cols = 40; // temp column count
-let rows = 30; // temp row count
-const Xstep = width / cols;
-const Ystep = height / rows;
-const step = (Xstep + Ystep) / 2;
-const hb = (width % step) / 2; // horizontal border width
-const vb = (height % step) / 2; // vertical border width
-cols = Math.floor(width / step);
-rows = Math.floor(height / step);
+let cols = 30; // temp column count, will get expanded out
+let rows = 20; // row count
+let hb = 5; // horizontal border width
+let vb = 10; // vertical border width
+const step = (height - 2 * vb) / rows; // grid step size
+hb = (width - cols * step) / 2; // set horizontal border according to new step
+
+// expand out the columns while we can place 4 additional columns
+// this ensures that we never go below the vertical border width
+while (step * 4 + cols * step < width - vb * 2) {
+  cols += 2;
+  hb -= step;
+}
 
 // draw border and fill blank color
 ctx.fillStyle = "red";
@@ -76,12 +74,6 @@ function posToString([x, y]: number[]): string {
   return `${x}_${y}`;
 }
 
-let dirX: number; // current X direction of snake
-let dirY: number; // current Y direction of snake
-let tmpX: number; // updated X direction after queued moves
-let tmpY: number; // updated Y direction after queued moves
-let moveQueue: { x: number; y: number }[] = []; // stores all user inputs
-
 // Snake node: (x, y) = position on grid, next = next node towards head
 interface Snake {
   x: number;
@@ -99,21 +91,19 @@ let len: number; // current length of snake
 let foodX: number; // food X position
 let foodY: number; // food Y position
 
+let cycle: Cycle; // Hamiltonian cycle
+
 function setup() {
   ctx.fillStyle = blankColor;
   ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 
-  dirX = 0;
-  dirY = 0;
-  tmpX = 0;
-  tmpY = 0;
-  moveQueue = [];
-
   body.clear();
 
+  cycle = createCycle(rows, cols);
+
   head = {
-    x: Math.floor(cols / 2),
-    y: Math.floor(rows / 2),
+    x: cycle.x,
+    y: cycle.y,
     next: null,
   };
   tail = head;
@@ -131,41 +121,6 @@ function setup() {
 
 setup();
 
-window.addEventListener("keydown", (e: KeyboardEvent) => {
-  switch (e.key) {
-    case "ArrowUp":
-      if (tmpY != 1) {
-        moveQueue.push({ x: 0, y: -1 });
-        tmpX = 0;
-        tmpY = -1;
-      }
-      break;
-    case "ArrowDown":
-      if (tmpY != -1) {
-        moveQueue.push({ x: 0, y: 1 });
-        tmpX = 0;
-        tmpY = 1;
-      }
-      break;
-    case "ArrowLeft":
-      if (tmpX != 1) {
-        moveQueue.push({ x: -1, y: 0 });
-        tmpX = -1;
-        tmpY = 0;
-      }
-      break;
-    case "ArrowRight":
-      if (tmpX != -1) {
-        moveQueue.push({ x: 1, y: 0 });
-        tmpX = 1;
-        tmpY = 0;
-      }
-      break;
-    default:
-      break;
-  }
-});
-
 // draws snake square with fill color, blank square if c == true
 function drawSnake(s: Snake, fill: string, c = false) {
   ctx.fillStyle = !c ? fill : blankColor;
@@ -177,25 +132,9 @@ function drawSnake(s: Snake, fill: string, c = false) {
 }
 
 function move() {
-  if (moveQueue.length > 0) {
-    let newDir = moveQueue.shift();
-    while (newDir.x == dirX && newDir.y == dirY && moveQueue.length > 0) {
-      newDir = moveQueue.shift();
-    }
-    dirX = newDir.x;
-    dirY = newDir.y;
-  }
-
-  if (dirX == 0 && dirY == 0) return;
-
-  const nextX = head.x + dirX;
-  const nextY = head.y + dirY;
-
-  // game over if hits walls
-  if (nextX == cols || nextX == -1 || nextY == rows || nextY == -1) {
-    setup();
-    return;
-  }
+  cycle = cycle.next;
+  const nextX = cycle.x;
+  const nextY = cycle.y;
 
   if (state) {
     body.delete(posToString([tail.x, tail.y]));
@@ -204,18 +143,16 @@ function move() {
   } else {
     if (len == growLen) {
       state = true;
-    } else {
-      len++;
     }
-  }
-
-  // game over if hits snake body
-  if (body.has(posToString([nextX, nextY]))) {
-    setup();
-    return;
+    len++;
   }
 
   drawSnake(head, snakeColor); // move old head color to body color
+
+  if (len == rows * cols) {
+    setup();
+    return;
+  }
 
   const next: Snake = { x: nextX, y: nextY, next: null };
   head.next = next;
