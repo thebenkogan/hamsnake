@@ -30,13 +30,12 @@ select.onchange = () => {
 
 const foodLen = 5; // length gained by eating food
 
-// get grid and border dimensions
-let cols = 16; // temp column count, will get expanded out
-let rows = 8; // row count
-let hb = 5; // horizontal border width
+// get grid and border dimensions; rows & cols must be even
+let cols = 40; // temp column count, will get expanded out
+let rows = 30; // row count
 let vb = 10; // vertical border width
 const step = (height - 2 * vb) / rows; // grid step size
-hb = (width - cols * step) / 2; // set horizontal border according to new step
+let hb = (width - cols * step) / 2; // set horizontal border according to new step
 
 // expand out the columns while we can place 4 additional columns
 // this ensures that we never go below the vertical border width
@@ -53,6 +52,7 @@ ctx.fillRect(0, 0, width, vb);
 ctx.fillRect(0, height - vb, width, vb);
 ctx.fillStyle = blankColor;
 ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
+ctx.strokeStyle = blankColor;
 
 // uncomment to draw underlying grid
 // ctx.strokeStyle = "#000000";
@@ -72,6 +72,16 @@ ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 
 function posToString([x, y]: number[]): string {
   return `${x}_${y}`;
+}
+
+// draws snake square with fill color, blank square if c == true
+function drawSnake(s: Snake, fill: string, c = false) {
+  ctx.fillStyle = !c ? fill : blankColor;
+  if (c) {
+    ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
+  } else {
+    ctx.fillRect(hb + s.x * step + 1, vb + s.y * step + 1, step - 2, step - 2);
+  }
 }
 
 // Snake node: (x, y) = position on grid, next = next node towards head
@@ -120,16 +130,6 @@ function setup() {
 }
 
 setup();
-
-// draws snake square with fill color, blank square if c == true
-function drawSnake(s: Snake, fill: string, c = false) {
-  ctx.fillStyle = !c ? fill : blankColor;
-  if (c) {
-    ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
-  } else {
-    ctx.fillRect(hb + s.x * step + 1, vb + s.y * step + 1, step - 2, step - 2);
-  }
-}
 
 function move() {
   cycle = cycle.next;

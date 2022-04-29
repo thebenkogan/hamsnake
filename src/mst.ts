@@ -109,7 +109,7 @@ export function neighborPos(x: number, y: number, dir: number): number[] {
 
 /** Returns true if the r x c grid-graph with node (x, y) does not have an edge
  *  in direction k, where k: 0 = up, 1 = right, 2 = bottom, 3 = left. */
-function invalidEdge(
+export function invalidEdge(
   r: number,
   c: number,
   x: number,

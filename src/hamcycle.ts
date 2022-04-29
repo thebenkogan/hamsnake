@@ -1,4 +1,4 @@
-import { MST, coordToNum, neighborPos } from "./mst";
+import { MST, coordToNum, neighborPos, invalidEdge } from "./mst";
 
 /** Node in Hamiltonian cycle at (x, y), with next position at next. The next
  *  node must be exactly 1 space from this node. The next of the last node
@@ -13,57 +13,61 @@ export interface Cycle {
  *  r and c must both be even. */
 export function createCycle(r: number, c: number): Cycle {
   const [mr, mc] = [r / 2, c / 2];
-  const mst = MST(mr, mc);
+  const mst = MST(mr, mc); // find random MST on half resolution grid-graph
 
-  let length = 1;
+  // current position in MST; pick random MST node and start at top right corner
   let [px, py] = [
     Math.floor(Math.random() * (c / 2)),
     Math.floor(Math.random() * (r / 2)),
   ];
-  let [up, right] = [true, true]; // [vertical, horizontal] -> true = up/right, false = down/left
 
+  // [vertical, horizontal] -> true = up/right, false = down/left
+  let [up, right] = [true, true];
+
+  // initialize cycle at top right of random MST node
   const startPos = mstPosToCyclePos([px, py], [up, right]);
   const start: Cycle = { x: startPos[0], y: startPos[1], next: null };
-  let cycle: Cycle = start;
+  let cycle: Cycle = start; // current position in cycle
 
+  // true if neighbor in 4 directions from MST node
+  const neighbors = [false, false, false, false];
+
+  // add cycle nodes until fills entire grid-graph
+  let length = 1;
   while (length < r * c) {
-    /*
-      rules:
-      1.) If above node, move right, else left
-      2.) If can't move right/left, move down if right of node, else up
-     */
-
+    // check if neighboring node in all four directions in MST
     const mstNum = coordToNum(mc, [px, py]);
-
-    const neighbors = [false, false, false, false];
     for (let i = 0; i < 4; i++) {
-      const nPos = coordToNum(mc, neighborPos(px, py, i));
-      if (mst[mstNum][nPos]) {
-        neighbors[i] = true;
-      }
+      neighbors[i] = !invalidEdge(mr, mc, px, py, i)
+        ? mst[mstNum][coordToNum(mc, neighborPos(px, py, i))]
+        : false;
     }
     const [neighborUp, neighborRight, neighborDown, neighborLeft] = neighbors;
 
-    const [currentX, currentY] = mstPosToCyclePos([px, py], [up, right]);
+    // this has the same behavior as tracing the outline of the MST using
+    // the right hand rule; first checks if can go right or left, otherwise
+    // it must either go up or down, which is determined by corner position
+
+    const [currX, currY] = mstPosToCyclePos([px, py], [up, right]);
     const nextNode = length == r * c - 1 ? start : null;
     if (up && ((!right && !neighborUp) || (right && neighborRight))) {
       // move right
-      cycle.next = { x: currentX + 1, y: currentY, next: nextNode };
+      cycle.next = { x: currX + 1, y: currY, next: nextNode };
       if (right) px += 1;
       right = !right;
     } else if (!up && ((right && !neighborDown) || (!right && neighborLeft))) {
       // move left
-      cycle.next = { x: currentX - 1, y: currentY, next: nextNode };
+      cycle.next = { x: currX - 1, y: currY, next: nextNode };
       if (!right) px -= 1;
       right = !right;
     } else if (right) {
       // move down
-      cycle.next = { x: currentX, y: currentY + 1, next: nextNode };
+      cycle.next = { x: currX, y: currY + 1, next: nextNode };
       if (!up) py += 1;
       up = !up;
     } else {
       // move up
-      cycle.next = { x: currentX, y: currentY - 1, next: nextNode };
+      cycle.next = { x: currX, y: currY - 1, next: nextNode };
       if (up) py -= 1;
       up = !up;
     }
@@ -75,6 +79,8 @@ export function createCycle(r: number, c: number): Cycle {
   return start;
 }
 
+/** Return coordinate on double-resolution grid-graph with [up, right]
+ *  determining the corner of the MST coordinate to return. */
 function mstPosToCyclePos([x, y]: number[], [up, right]: boolean[]): number[] {
   return [right ? 2 * x + 1 : 2 * x, up ? 2 * y : 2 * y + 1];
 }
