@@ -1,4 +1,4 @@
-import { MST, numToCoord, coordToNum, neighborPos } from "./mst";
+import { MST, coordToNum, neighborPos } from "./mst";
 
 /** Node in Hamiltonian cycle at (x, y), with next position at next. The next
  *  node must be exactly 1 space from this node. The next of the last node
@@ -38,7 +38,7 @@ export function createCycle(r: number, c: number): Cycle {
     const neighbors = [false, false, false, false];
     for (let i = 0; i < 4; i++) {
       const nPos = coordToNum(mc, neighborPos(px, py, i));
-      if (mst[mstNum][nPos] == 1) {
+      if (mst[mstNum][nPos]) {
         neighbors[i] = true;
       }
     }

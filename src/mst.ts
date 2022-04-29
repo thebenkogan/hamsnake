@@ -3,32 +3,42 @@ import { MinQueue } from "heapify";
 /** Finds a random minimum spanning tree for a grid-graph with r rows
  *  and c columns. Returns an adjacency matrix of the graph formed by the MST,
  *  indexed using number representation. */
-export function MST(r: number, c: number): number[][] {
+export function MST(r: number, c: number): boolean[][] {
   const graph = createRandomGridGraph(r, c);
-  const frontier = new MinQueue(r * c);
-  const mst: Array<Array<number>> = Array.from(Array(r * c), (_) =>
-    Array(r * c).fill(0)
-  );
-  const selected: Array<Array<number>> = Array.from(Array(c), (_) =>
-    Array(r).fill(0)
+  const frontier = new MinQueue(r * c); // Frontier nodes of Prim's algorithm
+
+  // Adjacency matrix of MST, with mst[x][y] = 1 representing an (x, y) edge
+  const mst: Array<Array<boolean>> = Array.from(Array(r * c), (_) =>
+    Array(r * c).fill(false)
   );
 
+  // Selected nodes in the MST; selected[x][y] = true if node at (x, y) in MST
+  const selected: Array<Array<boolean>> = Array.from(Array(c), (_) =>
+    Array(r).fill(false)
+  );
+
+  // Pick random node to start Prim's algorithm, add to frontier
   const start = [Math.floor(Math.random() * c), Math.floor(Math.random() * r)];
   frontier.push(coordToNum(c, start), 0);
 
+  // Pick nodes to add to MST until frontier is empty
   while (frontier.size > 0) {
-    const weight = frontier.peekPriority();
+    const weight = frontier.peekPriority(); // weight of edge that added node
     const [nextX, nextY] = numToCoord(c, frontier.pop());
-    if (selected[nextX][nextY] == 1) continue;
-    selected[nextX][nextY] = 1;
+    if (selected[nextX][nextY]) continue; // skip if node already added by different neighbor
+    selected[nextX][nextY] = true;
     graph[nextX][nextY].neighbors.forEach((w, i) => {
       if (w > 0) {
-        const neighbor = neighborPos(nextX, nextY, i);
-        if (selected[neighbor[0]][neighbor[1]] == 0) {
-          frontier.push(coordToNum(c, neighbor), w);
+        const [nx, ny] = neighborPos(nextX, nextY, i);
+        if (!selected[nx][ny]) {
+          frontier.push(coordToNum(c, [nx, ny]), w);
         } else if (w == weight) {
-          mst[coordToNum(c, neighbor)][coordToNum(c, [nextX, nextY])] = 1;
-          mst[coordToNum(c, [nextX, nextY])][coordToNum(c, neighbor)] = 1;
+          // selected neighbor with same weight edge must be one that added
+          // this node, thus create the edge; this is why uniqueness is ensured
+          const neighborNum = coordToNum(c, [nx, ny]);
+          const currentNum = coordToNum(c, [nextX, nextY]);
+          mst[neighborNum][currentNum] = true;
+          mst[currentNum][neighborNum] = true;
         }
       }
     });
@@ -38,7 +48,7 @@ export function MST(r: number, c: number): number[][] {
 }
 
 /** Converts number representation on grid-graph to (x,y) coordinate. */
-export function numToCoord(c: number, n: number): number[] {
+function numToCoord(c: number, n: number): number[] {
   return [n % c, Math.floor(n / c)];
 }
 
@@ -48,6 +58,7 @@ export function coordToNum(c: number, [x, y]: number[]): number {
   return y * c + x;
 }
 
+/** Grid-graph node used to compute MST. */
 interface Node {
   neighbors: number[];
 }
@@ -62,12 +73,13 @@ function createRandomGridGraph(r: number, c: number): Node[][] {
       .map(() => ({ neighbors: [0, 0, 0, 0] }))
   );
 
-  // r x c grid-graph has 2rc - r - c edges, define values for all
+  // r x c grid-graph has 2rc - r - c edges, define unique values for all
   const weights = Array(2 * r * c - r - c).fill(0);
   weights.forEach((_, i, arr) => {
     arr[i] = i + 1;
   });
 
+  // iterate through all nodes and assign edge-weights to neighbors
   for (let i = 0; i < c; i++) {
     for (let j = 0; j < r; j++) {
       for (let k = 0; k < 4; k++) {
