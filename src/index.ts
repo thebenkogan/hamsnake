@@ -1,4 +1,4 @@
-import { Cycle, createCycle } from "./hamcycle";
+import { Cycle, createCycle, findNextSquare } from "./hamcycle";
 
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -31,11 +31,11 @@ select.onchange = () => {
 const foodLen = 5; // length gained by eating food
 
 // get grid and border dimensions; rows & cols must be even
-let cols = 40; // temp column count, will get expanded out
-let rows = 30; // row count
+let rows = 20; // row count
 let vb = 10; // vertical border width
 const step = (height - 2 * vb) / rows; // grid step size
-let hb = (width - cols * step) / 2; // set horizontal border according to new step
+let hb = width / 2; // set horizontal border according to new step
+let cols = 0; // column count, will get expanded out
 
 // expand out the columns while we can place 4 additional columns
 // this ensures that we never go below the vertical border width
@@ -132,10 +132,6 @@ function setup() {
 setup();
 
 function move() {
-  cycle = cycle.next;
-  const nextX = cycle.x;
-  const nextY = cycle.y;
-
   if (state) {
     body.delete(posToString([tail.x, tail.y]));
     drawSnake(tail, snakeColor, true);
@@ -146,6 +142,14 @@ function move() {
     }
     len++;
   }
+
+  if (len > (rows * cols) / 2) {
+    cycle = cycle.next;
+  } else {
+    cycle = findNextSquare(cycle, [foodX, foodY], [tail.x, tail.y], foodLen);
+  }
+  const nextX = cycle.x;
+  const nextY = cycle.y;
 
   drawSnake(head, snakeColor); // move old head color to body color
 

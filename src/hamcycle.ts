@@ -84,3 +84,27 @@ export function createCycle(r: number, c: number): Cycle {
 function mstPosToCyclePos([x, y]: number[], [up, right]: boolean[]): number[] {
   return [right ? 2 * x + 1 : 2 * x, up ? 2 * y : 2 * y + 1];
 }
+
+export function findNextSquare(
+  cycle: Cycle,
+  [foodX, foodY]: number[],
+  [tailX, tailY]: number[],
+  separation: number
+): Cycle {
+  let curr: Cycle = cycle;
+  let next: Cycle = null;
+  let routes = 0;
+  while (
+    (curr.x != foodX || curr.y != foodY) &&
+    Math.abs(curr.x - tailX) + Math.abs(curr.y - tailY) > separation
+  ) {
+    if (Math.abs(curr.x - cycle.x) + Math.abs(curr.y - cycle.y) == 1) {
+      next = curr;
+      routes++;
+    }
+    curr = curr.next;
+    if (routes == 3) break; // checked all paths out of current position
+  }
+
+  return next || cycle.next;
+}
