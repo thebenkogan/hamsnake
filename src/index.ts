@@ -44,6 +44,8 @@ while (step * 4 + cols * step < width - vb * 2) {
   hb -= step;
 }
 
+console.log(cols * rows);
+
 // draw border and fill blank color
 ctx.fillStyle = "red";
 ctx.fillRect(0, 0, hb, height);
@@ -94,6 +96,7 @@ interface Snake {
 let body: Set<string> = new Set<string>(); // stores all snake node positions, O(1) lookup
 let head: Snake; // head node
 let tail: Snake; // tail node
+let tailIndex: number; // index of tail in cycle
 
 let state: boolean; // false = growing, true = steady
 let growLen: number; // target length of snake
@@ -146,7 +149,12 @@ function move() {
   if (len > (rows * cols) / 2) {
     cycle = cycle.next;
   } else {
-    cycle = findNextSquare(cycle, [foodX, foodY], [tail.x, tail.y], foodLen);
+    cycle = findNextSquare(
+      cycle,
+      [foodX, foodY],
+      [tail.x, tail.y],
+      rows * cols
+    );
   }
   const nextX = cycle.x;
   const nextY = cycle.y;

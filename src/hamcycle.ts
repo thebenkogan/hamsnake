@@ -4,6 +4,7 @@ import { MST, coordToNum, neighborPos, invalidEdge } from "./mst";
  *  node must be exactly 1 space from this node. The next of the last node
  *  is the first node in the cycle. */
 export interface Cycle {
+  index: number;
   x: number;
   y: number;
   next: Cycle;
@@ -26,7 +27,7 @@ export function createCycle(r: number, c: number): Cycle {
 
   // initialize cycle at top right of random MST node
   const startPos = mstPosToCyclePos([px, py], [up, right]);
-  const start: Cycle = { x: startPos[0], y: startPos[1], next: null };
+  const start: Cycle = { index: 0, x: startPos[0], y: startPos[1], next: null };
   let cycle: Cycle = start; // current position in cycle
 
   // true if neighbor in 4 directions from MST node
@@ -50,24 +51,25 @@ export function createCycle(r: number, c: number): Cycle {
 
     const [currX, currY] = mstPosToCyclePos([px, py], [up, right]);
     const nextNode = length == r * c - 1 ? start : null;
+    const nextIndex = cycle.index + 1;
     if (up && ((!right && !neighborUp) || (right && neighborRight))) {
       // move right
-      cycle.next = { x: currX + 1, y: currY, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX + 1, y: currY, next: nextNode };
       if (right) px += 1;
       right = !right;
     } else if (!up && ((right && !neighborDown) || (!right && neighborLeft))) {
       // move left
-      cycle.next = { x: currX - 1, y: currY, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX - 1, y: currY, next: nextNode };
       if (!right) px -= 1;
       right = !right;
     } else if (right) {
       // move down
-      cycle.next = { x: currX, y: currY + 1, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX, y: currY + 1, next: nextNode };
       if (!up) py += 1;
       up = !up;
     } else {
       // move up
-      cycle.next = { x: currX, y: currY - 1, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX, y: currY - 1, next: nextNode };
       if (up) py -= 1;
       up = !up;
     }
