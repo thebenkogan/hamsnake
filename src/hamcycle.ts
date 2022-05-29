@@ -87,20 +87,37 @@ function mstPosToCyclePos([x, y]: number[], [up, right]: boolean[]): number[] {
   return [right ? 2 * x + 1 : 2 * x, up ? 2 * y : 2 * y + 1];
 }
 
+function isInRange(
+  index: number,
+  head: number,
+  tail: number,
+  last: number
+): boolean {
+  return head > tail
+    ? index > tail && index < head
+    : (index > tail && index <= last) || index < head;
+}
+
+function distance(head: number, tail: number, last: number): number {
+  return head > tail ? last - head + tail : tail - head - 1;
+}
+
 export function findNextSquare(
   cycle: Cycle,
-  [foodX, foodY]: number[],
-  [tailX, tailY]: number[],
-  separation: number
+  foodIndex: number,
+  tailIndex: number,
+  separation: number,
+  maxIndex: number
 ): Cycle {
   let curr: Cycle = cycle;
   let next: Cycle = null;
   let routes = 0;
-  while (
-    (curr.x != foodX || curr.y != foodY) &&
-    Math.abs(curr.x - tailX) + Math.abs(curr.y - tailY) > separation
-  ) {
-    if (Math.abs(curr.x - cycle.x) + Math.abs(curr.y - cycle.y) == 1) {
+  while (curr.index != foodIndex && curr.index != tailIndex) {
+    if (
+      Math.abs(curr.x - cycle.x) + Math.abs(curr.y - cycle.y) == 1 &&
+      !isInRange(curr.index, cycle.index, tailIndex, maxIndex) &&
+      distance(curr.index, tailIndex, maxIndex) > separation
+    ) {
       next = curr;
       routes++;
     }
@@ -108,5 +125,26 @@ export function findNextSquare(
     if (routes == 3) break; // checked all paths out of current position
   }
 
+  if (next != null) console.log("skip");
+
   return next || cycle.next;
+}
+
+/** Returns map of grid-graph (x, y) position to index on cycle.
+ *  Requires the head of 'cycle' is index 0. */
+export function getIndexMap(
+  cycle: Cycle,
+  rows: number,
+  cols: number
+): number[][] {
+  const indexMap: Array<Array<number>> = Array.from(Array(cols), (_) =>
+    Array(rows).fill(0)
+  );
+
+  do {
+    indexMap[cycle.x][cycle.y] = cycle.index;
+    cycle = cycle.next;
+  } while (cycle.index != 0);
+
+  return indexMap;
 }

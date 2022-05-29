@@ -1,4 +1,4 @@
-import { Cycle, createCycle, findNextSquare } from "./hamcycle";
+import { Cycle, createCycle, findNextSquare, getIndexMap } from "./hamcycle";
 
 const div = document.getElementById("snake") as HTMLDivElement;
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
@@ -44,7 +44,7 @@ while (step * 4 + cols * step < width - vb * 2) {
   hb -= step;
 }
 
-console.log(cols * rows);
+const lastNodeIndex = rows * cols - 1;
 
 // draw border and fill blank color
 ctx.fillStyle = "red";
@@ -96,7 +96,6 @@ interface Snake {
 let body: Set<string> = new Set<string>(); // stores all snake node positions, O(1) lookup
 let head: Snake; // head node
 let tail: Snake; // tail node
-let tailIndex: number; // index of tail in cycle
 
 let state: boolean; // false = growing, true = steady
 let growLen: number; // target length of snake
@@ -105,6 +104,8 @@ let foodX: number; // food X position
 let foodY: number; // food Y position
 
 let cycle: Cycle; // Hamiltonian cycle
+let cycleIndexMap: number[][]; // Maps (x, y) position to hamcycle index
+const separation = 10;
 
 function setup() {
   ctx.fillStyle = blankColor;
@@ -113,6 +114,7 @@ function setup() {
   body.clear();
 
   cycle = createCycle(rows, cols);
+  cycleIndexMap = getIndexMap(cycle, rows, cols);
 
   head = {
     x: cycle.x,
@@ -151,9 +153,10 @@ function move() {
   } else {
     cycle = findNextSquare(
       cycle,
-      [foodX, foodY],
-      [tail.x, tail.y],
-      rows * cols
+      cycleIndexMap[foodX][foodY],
+      cycleIndexMap[tail.x][tail.y],
+      separation,
+      lastNodeIndex
     );
   }
   const nextX = cycle.x;
