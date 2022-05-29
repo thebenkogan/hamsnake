@@ -125,8 +125,6 @@ export function findNextSquare(
     if (routes == 3) break; // checked all paths out of current position
   }
 
-  if (next != null) console.log("skip");
-
   return next || cycle.next;
 }
 
