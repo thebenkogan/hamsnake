@@ -5,8 +5,10 @@ const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const ctx = canvas.getContext("2d", {
   alpha: false,
 }) as CanvasRenderingContext2D;
-const select = document.getElementById("speed") as HTMLSelectElement;
 const slider = document.getElementById("slider") as HTMLInputElement;
+const hamcycleCheckbox = document.getElementById(
+  "showPath"
+) as HTMLInputElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
@@ -23,15 +25,15 @@ let speed = +slider.value; // ms delay between each snake movement
 
 let interval = setInterval(move, speed);
 
-select.onchange = () => {
-  clearInterval(interval);
-  interval = setInterval(move, +select.value);
-  setup();
-  select.blur();
-};
-
 slider.oninput = () => {
   speed = 100 - +slider.value;
+};
+
+hamcycleCheckbox.onchange = () => {
+  if (!hamcycleCheckbox.checked) {
+    ctx.fillStyle = blankColor;
+    ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
+  }
 };
 
 /** We do not want to clear the game interval on slider input because
@@ -203,7 +205,7 @@ function move() {
 
   drawSnake(head, headColor); // draw head after tail for tail following
 
-  drawHamcycle(cycle);
+  if (hamcycleCheckbox.checked) drawHamcycle(cycle);
 }
 
 // draws new random food and clears old one

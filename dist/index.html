@@ -10,11 +10,10 @@
   <body>
     <div id="wrapper">
       <div id="top">
-        <select id="speed">
-          <option value="80">Slow</option>
-          <option value="50">Normal</option>
-          <option value="20" selected>Fast</option>
-        </select>
+        <div class="checkbox-container">
+          <input type="checkbox" id="showPath" />
+          <label for="showPath">Show Hamiltonian Cycle</label>
+        </div>
         <div class="slider-container">
           <h3>Speed</h3>
           <input type="range" min="12" max="97" value="54" id="slider" />
