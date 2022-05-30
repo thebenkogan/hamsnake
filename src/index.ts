@@ -17,6 +17,7 @@ const snakeColor = "#5591f2";
 const headColor = "#0f5cd9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
+const hamcyclePathColor = "#797a79";
 
 let speed = +slider.value; // ms delay between each snake movement
 
@@ -88,10 +89,6 @@ ctx.strokeStyle = blankColor;
 //   ctx.stroke();
 // }
 
-function posToString([x, y]: number[]): string {
-  return `${x}_${y}`;
-}
-
 // draws snake square with fill color, blank square if c == true
 function drawSnake(s: Snake, fill: string, c = false) {
   ctx.fillStyle = !c ? fill : blankColor;
@@ -124,7 +121,6 @@ let foodY: number; // food Y position
 let cycle: Cycle; // Hamiltonian cycle
 let cycleIndexMap: number[][]; // Maps (x, y) position to hamcycle index
 const separation = Math.floor((rows * cols) / 4);
-console.log(separation);
 
 function setup() {
   ctx.fillStyle = blankColor;
@@ -206,6 +202,8 @@ function move() {
   }
 
   drawSnake(head, headColor); // draw head after tail for tail following
+
+  drawHamcycle(cycle);
 }
 
 // draws new random food and clears old one
@@ -235,4 +233,20 @@ function genFood() {
 
   foodX = nextX;
   foodY = nextY;
+}
+
+function drawHamcycle(cycle: Cycle) {
+  const endIndex = cycle.next.index;
+  ctx.strokeStyle = hamcyclePathColor;
+  ctx.lineWidth = 2;
+  let [lastX, lastY] = [cycle.x, cycle.y];
+  cycle = cycle.next;
+  do {
+    ctx.beginPath();
+    ctx.moveTo(hb + lastX * step + step / 2, vb + lastY * step + step / 2);
+    ctx.lineTo(hb + cycle.x * step + step / 2, vb + cycle.y * step + step / 2);
+    ctx.stroke();
+    [lastX, lastY] = [cycle.x, cycle.y];
+    cycle = cycle.next;
+  } while (cycle.index != endIndex);
 }
