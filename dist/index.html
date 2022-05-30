@@ -10,14 +10,18 @@
   <body>
     <div id="wrapper">
       <div id="top">
-        <a href="https://github.com/thebenkogan/hamsnake" target="_blank"
-          ><h2>Source</h2></a
-        >
         <select id="speed">
           <option value="80">Slow</option>
           <option value="50">Normal</option>
           <option value="20" selected>Fast</option>
         </select>
+        <div class="slider-container">
+          <h3>Speed</h3>
+          <input type="range" min="1" max="100" value="50" id="slider" />
+        </div>
+        <a href="https://github.com/thebenkogan/hamsnake" target="_blank">
+          <h2>Source</h2>
+        </a>
       </div>
       <div id="snake">
         <canvas id="canvas" tabindex="1" style="outline: 0"></canvas>

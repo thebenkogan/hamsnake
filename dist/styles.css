@@ -15,10 +15,14 @@ body {
 
 #top {
   position: relative;
-  flex: 1 1 100%;
+  padding-right: 7vh;
+  padding-left: 7vh;
+  display: flex;
   height: 5%;
+  width: 100%;
   background-color: #ff0000;
   text-align: center;
+  justify-content: space-between;
 }
 
 select {
@@ -32,12 +36,28 @@ select {
   text-align: center;
 }
 
+.slider-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: max-content;
+}
+
+#slider {
+  position: relative;
+  height: 60%;
+  accent-color: #181818;
+}
+
 h2 {
-  top: 50%;
   transform: translateY(-50%);
-  position: absolute;
+  position: relative;
   top: 0px;
-  right: 1%;
+}
+
+h3 {
+  padding: 0px;
+  margin: 0px;
 }
 
 option {
