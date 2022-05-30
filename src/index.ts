@@ -29,13 +29,6 @@ slider.oninput = () => {
   speed = 100 - +slider.value;
 };
 
-hamcycleCheckbox.onchange = () => {
-  if (!hamcycleCheckbox.checked) {
-    ctx.fillStyle = blankColor;
-    ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
-  }
-};
-
 /** We do not want to clear the game interval on slider input because
  the slider interrupts way too much, causing the snake to pause while
  the user is adjusting. In order to have smooth speed changes, we run
@@ -124,6 +117,28 @@ let cycle: Cycle; // Hamiltonian cycle
 let cycleIndexMap: number[][]; // Maps (x, y) position to hamcycle index
 const separation = Math.floor((rows * cols) / 4);
 
+/** When 'show hamcycle' is unchecked, we need to clear the path while
+ *  preserving the snake body. We do not draw the snake body on every
+ *  iteration, thus we have to iterate across the body matrix and redraw
+ *  every node. We also have to redraw the food. */
+hamcycleCheckbox.onchange = () => {
+  if (!hamcycleCheckbox.checked) {
+    ctx.fillStyle = blankColor;
+    ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
+    body.forEach((arr, x) => {
+      arr.forEach((filled, y) => {
+        if (filled) {
+          drawSnake(
+            { x: x, y: y, next: null },
+            head.x == x && head.y == y ? headColor : snakeColor
+          );
+        }
+      });
+    });
+    drawFood(foodX, foodY);
+  }
+};
+
 function setup() {
   ctx.fillStyle = blankColor;
   ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
@@ -208,6 +223,19 @@ function move() {
   if (hamcycleCheckbox.checked) drawHamcycle(cycle);
 }
 
+function drawFood(x: number, y: number) {
+  ctx.fillStyle = foodColor;
+  ctx.beginPath();
+  ctx.arc(
+    hb + x * step + step / 2,
+    vb + y * step + step / 2,
+    step / 2 - 3,
+    0,
+    2 * Math.PI
+  );
+  ctx.fill();
+}
+
 // draws new random food and clears old one
 function genFood() {
   ctx.fillStyle = blankColor;
@@ -222,16 +250,7 @@ function genFood() {
     valid = !body[nextX][nextY];
   }
 
-  ctx.fillStyle = foodColor;
-  ctx.beginPath();
-  ctx.arc(
-    hb + nextX * step + step / 2,
-    vb + nextY * step + step / 2,
-    step / 2 - 3,
-    0,
-    2 * Math.PI
-  );
-  ctx.fill();
+  drawFood(nextX, nextY);
 
   foodX = nextX;
   foodY = nextY;
