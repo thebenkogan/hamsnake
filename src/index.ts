@@ -56,6 +56,7 @@ while (step * 4 + cols * step < width - vb * 2) {
   hb -= step;
 }
 
+const shortcutsThreshold = rows * cols * 0.9;
 const lastNodeIndex = rows * cols - 1;
 
 // draw border and fill blank color
@@ -67,32 +68,6 @@ ctx.fillRect(0, height - vb, width, vb);
 ctx.fillStyle = blankColor;
 ctx.fillRect(hb, vb, width - 2 * hb, height - 2 * vb);
 ctx.strokeStyle = blankColor;
-
-// uncomment to draw underlying grid
-// ctx.strokeStyle = "#000000";
-// ctx.lineWidth = 1;
-// for (let i = 0; i < rows; i++) {
-//   ctx.beginPath();
-//   ctx.moveTo(hb, vb + i * step);
-//   ctx.lineTo(width - hb, vb + i * step);
-//   ctx.stroke();
-// }
-// for (let i = 0; i < cols; i++) {
-//   ctx.beginPath();
-//   ctx.moveTo(hb + i * step, vb);
-//   ctx.lineTo(hb + i * step, height - vb);
-//   ctx.stroke();
-// }
-
-// draws snake square with fill color, blank square if c == true
-function drawSnake(s: Snake, fill: string, c = false) {
-  ctx.fillStyle = !c ? fill : blankColor;
-  if (c) {
-    ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
-  } else {
-    ctx.fillRect(hb + s.x * step + 1, vb + s.y * step + 1, step - 2, step - 2);
-  }
-}
 
 // Snake node: (x, y) = position on grid, next = next node towards head
 interface Snake {
@@ -180,7 +155,7 @@ function move() {
     len++;
   }
 
-  if (len > (rows * cols) / 2) {
+  if (len > shortcutsThreshold) {
     cycle = cycle.next;
   } else {
     cycle = findNextSquare(
@@ -223,19 +198,6 @@ function move() {
   if (hamcycleCheckbox.checked) drawHamcycle(cycle);
 }
 
-function drawFood(x: number, y: number) {
-  ctx.fillStyle = foodColor;
-  ctx.beginPath();
-  ctx.arc(
-    hb + x * step + step / 2,
-    vb + y * step + step / 2,
-    step / 2 - 3,
-    0,
-    2 * Math.PI
-  );
-  ctx.fill();
-}
-
 // draws new random food and clears old one
 function genFood() {
   ctx.fillStyle = blankColor;
@@ -254,6 +216,29 @@ function genFood() {
 
   foodX = nextX;
   foodY = nextY;
+}
+
+// draws snake square with fill color, blank square if c == true
+function drawSnake(s: Snake, fill: string, c = false) {
+  ctx.fillStyle = !c ? fill : blankColor;
+  if (c) {
+    ctx.fillRect(hb + s.x * step, vb + s.y * step, step, step);
+  } else {
+    ctx.fillRect(hb + s.x * step + 1, vb + s.y * step + 1, step - 2, step - 2);
+  }
+}
+
+function drawFood(x: number, y: number) {
+  ctx.fillStyle = foodColor;
+  ctx.beginPath();
+  ctx.arc(
+    hb + x * step + step / 2,
+    vb + y * step + step / 2,
+    step / 2 - 3,
+    0,
+    2 * Math.PI
+  );
+  ctx.fill();
 }
 
 function drawHamcycle(cycle: Cycle) {
