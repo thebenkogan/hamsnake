@@ -6,6 +6,7 @@ const ctx = canvas.getContext("2d", {
   alpha: false,
 }) as CanvasRenderingContext2D;
 const select = document.getElementById("speed") as HTMLSelectElement;
+const slider = document.getElementById("slider") as HTMLInputElement;
 
 const width = div.clientWidth;
 const height = div.clientHeight;
@@ -17,7 +18,7 @@ const headColor = "#0f5cd9";
 const blankColor = "#181818";
 const foodColor = "#4bf542";
 
-let speed = +select.value; // ms delay between each snake movement
+let speed = +slider.value; // ms delay between each snake movement
 
 let interval = setInterval(move, speed);
 
@@ -27,6 +28,21 @@ select.onchange = () => {
   setup();
   select.blur();
 };
+
+slider.oninput = () => {
+  speed = 100 - +slider.value;
+};
+
+/** We do not want to clear the game interval on slider input because
+ the slider interrupts way too much, causing the snake to pause while
+ the user is adjusting. In order to have smooth speed changes, we run
+ this update job every 100 ms to grab the new speed value and set the
+ interval. This way, we are only clearing the interval every 100ms, while
+ still grabbing the most recent speed value and not impacting smoothness. */
+const speedUpdateJob = setInterval(() => {
+  clearInterval(interval);
+  interval = setInterval(move, speed);
+}, 100);
 
 const foodLen = 5; // length gained by eating food
 
