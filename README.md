@@ -10,7 +10,7 @@ To create a Hamiltonian cycle on a grid-graph, I followed the ideas outlined in 
 
 ## Hamiltonian Cycle Following
 
-With just following the Hamiltonian cycle, the snake will never lose. Covering every square ensures that it will eventually reach the food, and visiting each node once per cycle ensures that it will never hit its body (until the snake is the size of the grid, which is exactly when it wins). However, this approach is very efficient and slow. Often times, the snake will traverse the entire cycle when it could easily follow some shortcuts to grab the next food. Thus, the next steps were to create rules for when the snake could take shortcuts.
+With just following the Hamiltonian cycle, the snake will never lose. Covering every square ensures that it will eventually reach the food, and visiting each node once per cycle ensures that it will never hit its body (until the snake is the size of the grid, which is exactly when it wins). However, this approach is very inefficient and slow. Often times, the snake will traverse the entire cycle when it could easily follow some shortcuts to grab the next food. Thus, the next steps were to create rules for when the snake could take shortcuts.
 
 ## Shortcuts
 
