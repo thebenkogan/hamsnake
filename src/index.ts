@@ -56,7 +56,7 @@ while (step * 4 + cols * step < width - vb * 2) {
   hb -= step;
 }
 
-const shortcutsThreshold = rows * cols * 0.9;
+const shortcutsThreshold = rows * cols * 1; // never turned off for now
 const lastNodeIndex = rows * cols - 1;
 
 // draw border and fill blank color

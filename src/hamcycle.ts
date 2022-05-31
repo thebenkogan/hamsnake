@@ -109,10 +109,11 @@ export function findNextSquare(
   separation: number,
   maxIndex: number
 ): Cycle {
+  const indexAfterFood = foodIndex < maxIndex ? foodIndex + 1 : 0;
   let curr: Cycle = cycle;
   let next: Cycle = null;
   let routes = 0;
-  while (curr.index != foodIndex && curr.index != tailIndex) {
+  while (curr.index != indexAfterFood && curr.index != tailIndex) {
     if (
       Math.abs(curr.x - cycle.x) + Math.abs(curr.y - cycle.y) == 1 &&
       !isInRange(curr.index, cycle.index, tailIndex, maxIndex) &&
