@@ -1,5 +1,7 @@
 # HAMSNAKE
 
+http://hamsnake.benkogan.io/
+
 An AI that plays the game Snake by following a Hamiltonian Cycle and taking shortcuts. Includes a slider to control the speed and a toggle for visualizing the underlying Hamiltonian cycle. Built with Typescript and Webpack.
 
 Build with `npm run build`
