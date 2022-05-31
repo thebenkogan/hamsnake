@@ -4,6 +4,8 @@ An AI that plays the game Snake by following a Hamiltonian Cycle and taking shor
 
 Build with `npm run build`
 
+Name inspired by the NP-Complete problems HAMPATH and HAMCYCLE, although this implementation is in polynomial time :)
+
 ## Hamiltonian Cycle Generation
 
 To create a Hamiltonian cycle on a grid-graph, I followed the ideas outlined in this article: https://medium.com/@pascal.sommer.ch/generating-hamiltonian-cycles-in-rectangular-grid-graphs-316c94ecefe0. The general outline is to first generate a random minimum spanning tree (MST) on a half resolution grid-graph, then trace the outline to obtain the Hamiltonian cycle on the original grid-graph. I first assign random edge weights to the grid-graph, then use Prim's algorithm to find the MST. Note that the spanning tree is not required to be of minimum weight, but I think it is a pretty straightforward algorithm for generating a spanning tree and ensuring the (pseudo)randomness. After creating the MST, I trace the outline by following the right-hand rule (i.e. walking around the MST and always turning right). Note that the original grid-graph must have an even number of rows and columns, since the first step is to find an MST on a half-resolution grid-graph by cutting the original dimensions in half.
