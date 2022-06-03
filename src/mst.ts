@@ -27,9 +27,9 @@ export function MST(r: number, c: number): boolean[][] {
     const [nextX, nextY] = numToCoord(c, frontier.pop() as number);
     if (selected[nextX][nextY]) continue; // skip if node already added by different neighbor
     selected[nextX][nextY] = true;
-    graph[nextX][nextY].neighbors.forEach((w, i) => {
+    Object.entries(graph[nextX][nextY]).forEach(([dir, w]) => {
       if (w > 0) {
-        const [nx, ny] = neighborPos(nextX, nextY, i);
+        const [nx, ny] = neighborPos(nextX, nextY, dir as Direction);
         if (!selected[nx][ny]) {
           frontier.push(coordToNum(c, [nx, ny]), w);
         } else if (w == weight) {
@@ -58,10 +58,11 @@ export function coordToNum(c: number, [x, y]: number[]): number {
   return y * c + x;
 }
 
-/** Grid-graph node used to compute MST. */
-interface Node {
-  neighbors: number[];
-}
+/** Grid-graph node used to compute MST. Maps direction from node to weight of edge. */
+type Node = { [key in Direction]: number };
+
+export type Direction = "up" | "down" | "left" | "right";
+export const directions: Direction[] = ["up", "down", "left", "right"];
 
 /** Creates a r x c grid-graph with unique random edge weights in the range
  *  [1, r x c]. Represented with a 2D Node array with edge weights defined in
@@ -70,7 +71,7 @@ function createRandomGridGraph(r: number, c: number): Node[][] {
   const graph: Array<Array<Node>> = Array.from(Array(c), (_) =>
     Array(r)
       .fill(0)
-      .map(() => ({ neighbors: [0, 0, 0, 0] }))
+      .map(() => ({ up: 0, down: 0, left: 0, right: 0 }))
   );
 
   // r x c grid-graph has 2rc - r - c edges, define unique values for all
@@ -82,18 +83,18 @@ function createRandomGridGraph(r: number, c: number): Node[][] {
   // iterate through all nodes and assign edge-weights to neighbors
   for (let i = 0; i < c; i++) {
     for (let j = 0; j < r; j++) {
-      for (let k = 0; k < 4; k++) {
-        if (graph[i][j].neighbors[k] == 0 && !invalidEdge(r, c, i, j, k)) {
+      directions.forEach((dir) => {
+        if (graph[i][j][dir] == 0 && !invalidEdge(r, c, i, j, dir)) {
           const [weight] = weights.splice(
             Math.floor(Math.random() * weights.length),
             1
           );
-          graph[i][j].neighbors[k] = weight;
-          const [nx, ny] = neighborPos(i, j, k);
-          const relativeNeighbor = k > 1 ? k - 2 : k + 2;
-          graph[nx][ny].neighbors[relativeNeighbor] = weight;
+          graph[i][j][dir] = weight;
+          const [nx, ny] = neighborPos(i, j, dir);
+          const neighborDirection = oppositeDirection(dir);
+          graph[nx][ny][neighborDirection] = weight;
         }
-      }
+      });
     }
   }
 
@@ -101,24 +102,37 @@ function createRandomGridGraph(r: number, c: number): Node[][] {
 }
 
 /** Returns the coordinate of the neighbor of the node at (x, y) in dir(ection). */
-export function neighborPos(x: number, y: number, dir: number): number[] {
-  const dirx = dir == 1 ? 1 : dir == 3 ? -1 : 0;
-  const diry = dir == 0 ? -1 : dir == 2 ? 1 : 0;
+export function neighborPos(x: number, y: number, dir: Direction): number[] {
+  const dirx = dir == "right" ? 1 : dir == "left" ? -1 : 0;
+  const diry = dir == "up" ? -1 : dir == "down" ? 1 : 0;
   return [x + dirx, y + diry];
 }
 
+function oppositeDirection(dir: Direction): Direction {
+  switch (dir) {
+    case "up":
+      return "down";
+    case "down":
+      return "up";
+    case "left":
+      return "right";
+    case "right":
+      return "left";
+  }
+}
+
 /** Returns true if the r x c grid-graph with node (x, y) does not have an edge
- *  in direction k, where k: 0 = up, 1 = right, 2 = bottom, 3 = left. */
+ *  in direction k, where k: 0 = up, 1 = right, 2 = down, 3 = left. */
 export function invalidEdge(
   r: number,
   c: number,
   x: number,
   y: number,
-  k: number
+  dir: Direction
 ): boolean {
-  const top: boolean = y == 0 && k == 0;
-  const bottom: boolean = y == r - 1 && k == 2;
-  const left: boolean = x == 0 && k == 3;
-  const right: boolean = x == c - 1 && k == 1;
-  return top || bottom || left || right;
+  const top: boolean = y == 0 && dir == "up";
+  const down: boolean = y == r - 1 && dir == "down";
+  const left: boolean = x == 0 && dir == "left";
+  const right: boolean = x == c - 1 && dir == "right";
+  return top || down || left || right;
 }

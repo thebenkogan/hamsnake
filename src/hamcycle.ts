@@ -1,4 +1,11 @@
-import { MST, coordToNum, neighborPos, invalidEdge } from "./mst";
+import {
+  MST,
+  coordToNum,
+  neighborPos,
+  invalidEdge,
+  directions,
+  Direction,
+} from "./mst";
 
 /** Node in Hamiltonian cycle at (x, y), with next position at next. The next
  *  node must be exactly 1 space from this node. The next of the last node
@@ -36,19 +43,25 @@ export function createCycle(r: number, c: number): Cycle {
   let cycle: Cycle = start; // current position in cycle
 
   // true if neighbor in 4 directions from MST node
-  const neighbors = [false, false, false, false];
+  const neighbors: { [key in Direction]: boolean } = {
+    up: false,
+    right: false,
+    down: false,
+    left: false,
+  };
 
   // add cycle nodes until fills entire grid-graph
   let length = 1;
   while (length < r * c) {
     // check if neighboring node in all four directions in MST
     const mstNum = coordToNum(mc, [px, py]);
-    for (let i = 0; i < 4; i++) {
-      neighbors[i] = !invalidEdge(mr, mc, px, py, i)
-        ? mst[mstNum][coordToNum(mc, neighborPos(px, py, i))]
+    directions.forEach((dir) => {
+      neighbors[dir] = !invalidEdge(mr, mc, px, py, dir)
+        ? mst[mstNum][coordToNum(mc, neighborPos(px, py, dir))]
         : false;
-    }
-    const [neighborUp, neighborRight, neighborDown, neighborLeft] = neighbors;
+    });
+    const [neighborUp, neighborRight, neighborDown, neighborLeft] =
+      Object.values(neighbors);
 
     // this has the same behavior as tracing the outline of the MST using
     // the right hand rule; first checks if can go right or left, otherwise
