@@ -24,7 +24,7 @@ export function MST(r: number, c: number): boolean[][] {
   // Pick nodes to add to MST until frontier is empty
   while (frontier.size > 0) {
     const weight = frontier.peekPriority(); // weight of edge that added node
-    const [nextX, nextY] = numToCoord(c, frontier.pop());
+    const [nextX, nextY] = numToCoord(c, frontier.pop() as number);
     if (selected[nextX][nextY]) continue; // skip if node already added by different neighbor
     selected[nextX][nextY] = true;
     graph[nextX][nextY].neighbors.forEach((w, i) => {

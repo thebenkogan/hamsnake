@@ -73,7 +73,7 @@ ctx.strokeStyle = blankColor;
 interface Snake {
   x: number;
   y: number;
-  next: Snake;
+  next: Snake | null;
 }
 
 const body: Array<Array<boolean>> = Array.from(Array(cols), (_) =>
@@ -147,7 +147,7 @@ function move() {
   if (state) {
     body[tail.x][tail.y] = false;
     drawSnake(tail, snakeColor, true);
-    tail = tail.next;
+    tail = tail.next as Snake;
   } else {
     if (len == growLen) {
       state = true;
@@ -203,19 +203,14 @@ function genFood() {
   ctx.fillStyle = blankColor;
   ctx.fillRect(hb + foodX * step, vb + foodY * step, step, step);
 
-  let nextX;
-  let nextY;
   let valid = false;
   while (!valid) {
-    nextX = Math.floor(Math.random() * cols);
-    nextY = Math.floor(Math.random() * rows);
-    valid = !body[nextX][nextY];
+    foodX = Math.floor(Math.random() * cols);
+    foodY = Math.floor(Math.random() * rows);
+    valid = !body[foodX][foodY];
   }
 
-  drawFood(nextX, nextY);
-
-  foodX = nextX;
-  foodY = nextY;
+  drawFood(foodX, foodY);
 }
 
 // draws snake square with fill color, blank square if c == true

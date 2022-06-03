@@ -27,7 +27,12 @@ export function createCycle(r: number, c: number): Cycle {
 
   // initialize cycle at top right of random MST node
   const startPos = mstPosToCyclePos([px, py], [up, right]);
-  const start: Cycle = { index: 0, x: startPos[0], y: startPos[1], next: null };
+  const start: Cycle = {
+    index: 0,
+    x: startPos[0],
+    y: startPos[1],
+    next: {} as Cycle, // will get reassigned
+  };
   let cycle: Cycle = start; // current position in cycle
 
   // true if neighbor in 4 directions from MST node
@@ -50,26 +55,25 @@ export function createCycle(r: number, c: number): Cycle {
     // it must either go up or down, which is determined by corner position
 
     const [currX, currY] = mstPosToCyclePos([px, py], [up, right]);
-    const nextNode = length == r * c - 1 ? start : null;
     const nextIndex = cycle.index + 1;
     if (up && ((!right && !neighborUp) || (right && neighborRight))) {
       // move right
-      cycle.next = { index: nextIndex, x: currX + 1, y: currY, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX + 1, y: currY, next: start };
       if (right) px += 1;
       right = !right;
     } else if (!up && ((right && !neighborDown) || (!right && neighborLeft))) {
       // move left
-      cycle.next = { index: nextIndex, x: currX - 1, y: currY, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX - 1, y: currY, next: start };
       if (!right) px -= 1;
       right = !right;
     } else if (right) {
       // move down
-      cycle.next = { index: nextIndex, x: currX, y: currY + 1, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX, y: currY + 1, next: start };
       if (!up) py += 1;
       up = !up;
     } else {
       // move up
-      cycle.next = { index: nextIndex, x: currX, y: currY - 1, next: nextNode };
+      cycle.next = { index: nextIndex, x: currX, y: currY - 1, next: start };
       if (up) py -= 1;
       up = !up;
     }
@@ -111,7 +115,7 @@ export function findNextSquare(
 ): Cycle {
   const indexAfterFood = foodIndex < maxIndex ? foodIndex + 1 : 0;
   let curr: Cycle = cycle;
-  let next: Cycle = null;
+  let next: Cycle | null = null;
   let routes = 0;
   while (curr.index != indexAfterFood && curr.index != tailIndex) {
     if (
@@ -126,7 +130,7 @@ export function findNextSquare(
     if (routes == 3) break; // checked all paths out of current position
   }
 
-  return next || cycle.next;
+  return next ?? cycle.next;
 }
 
 /** Returns map of grid-graph (x, y) position to index on cycle.
