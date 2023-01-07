@@ -121,29 +121,40 @@ function distance(head: number, tail: number, last: number): number {
 
 export function findNextSquare(
   cycle: Cycle,
-  foodIndex: number,
-  tailIndex: number,
+  cycleMap: Cycle[][],
+  [foodX, foodY]: [number, number],
+  [tailX, tailY]: [number, number],
   separation: number,
   maxIndex: number
 ): Cycle {
+  const foodIndex = cycleMap[foodX][foodY].index;
+  const tailIndex = cycleMap[tailX][tailY].index;
   const indexAfterFood = foodIndex < maxIndex ? foodIndex + 1 : 0;
-  let curr: Cycle = cycle;
-  let next: Cycle | null = null;
-  let routes = 0;
-  while (curr.index != indexAfterFood && curr.index != tailIndex) {
-    if (
-      Math.abs(curr.x - cycle.x) + Math.abs(curr.y - cycle.y) == 1 &&
-      !isInRange(curr.index, cycle.index, tailIndex, maxIndex) &&
-      distance(curr.index, tailIndex, maxIndex) > separation
-    ) {
-      next = curr;
-      routes++;
+  let bestNext: Cycle | null = null;
+  let bestDistance = Infinity;
+
+  for (const [dx, dy] of [
+    [1, 0],
+    [0, 1],
+    [-1, 0],
+    [0, -1],
+  ]) {
+    if (!cycleMap[cycle.x + dx] || !cycleMap[cycle.x + dx][cycle.y + dy]) {
+      continue;
     }
-    curr = curr.next;
-    if (routes == 3) break; // checked all paths out of current position
+    const next = cycleMap[cycle.x + dx][cycle.y + dy];
+    if (
+      isInRange(next.index, indexAfterFood, cycle.index, maxIndex) &&
+      !isInRange(next.index, cycle.index, tailIndex, maxIndex) &&
+      distance(next.index, tailIndex, maxIndex) > separation &&
+      distance(next.index, foodIndex, maxIndex) < bestDistance
+    ) {
+      bestDistance = distance(next.index, foodIndex, maxIndex);
+      bestNext = next;
+    }
   }
 
-  return next ?? cycle.next;
+  return bestNext ?? cycle.next;
 }
 
 /** Returns map of grid-graph (x, y) position to index on cycle.
@@ -152,13 +163,13 @@ export function getIndexMap(
   cycle: Cycle,
   rows: number,
   cols: number
-): number[][] {
-  const indexMap: Array<Array<number>> = Array.from(Array(cols), (_) =>
+): Cycle[][] {
+  const indexMap: Array<Array<Cycle>> = Array.from(Array(cols), (_) =>
     Array(rows).fill(0)
   );
 
   do {
-    indexMap[cycle.x][cycle.y] = cycle.index;
+    indexMap[cycle.x][cycle.y] = cycle;
     cycle = cycle.next;
   } while (cycle.index != 0);
 

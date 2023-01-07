@@ -89,7 +89,7 @@ let foodX: number; // food X position
 let foodY: number; // food Y position
 
 let cycle: Cycle; // Hamiltonian cycle
-let cycleIndexMap: number[][]; // Maps (x, y) position to hamcycle index
+let cycleIndexMap: Cycle[][]; // Maps (x, y) position to hamcycle index
 const separation = Math.floor((rows * cols) / 4);
 
 /** When 'show hamcycle' is unchecked, we need to clear the path while
@@ -160,8 +160,9 @@ function move() {
   } else {
     cycle = findNextSquare(
       cycle,
-      cycleIndexMap[foodX][foodY],
-      cycleIndexMap[tail.x][tail.y],
+      cycleIndexMap,
+      [foodX, foodY],
+      [tail.x, tail.y],
       separation,
       lastNodeIndex
     );
